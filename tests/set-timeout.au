@@ -4,5 +4,5 @@ def callback() {
     print "hello world\n";
 }
 
-tasks::set_interval(.callback, 1000);
+tasks::set_timeout(.callback, 1000);
 tasks::run();

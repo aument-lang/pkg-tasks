@@ -20,6 +20,9 @@ uv_dep = cc.find_library('uv')
 
 src = [
     'src/tasks.c',
+    'src/tasks.h',
+    'src/timer.c',
+    'src/timer.h',
 ]
 shared_module('tasks', src,
     include_directories: include_directories('src'),
