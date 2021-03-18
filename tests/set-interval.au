@@ -1,0 +1,8 @@
+import "../build/libtasks.dll" as tasks;
+
+def callback(_) {
+    print "hello world\n";
+}
+
+tasks::set_interval(nil.callback, 1000);
+tasks::run();
