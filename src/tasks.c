@@ -17,7 +17,6 @@ void tasks_ctx_append(struct task_header *header) {
         tasks_ctx.task_list->prev = header;
 }
 
-
 static void tasks_ctx_del(struct tasks_ctx *ctx) {
     struct task_header *cur = ctx->task_list;
     while(cur != 0) {
@@ -28,6 +27,8 @@ static void tasks_ctx_del(struct tasks_ctx *ctx) {
     }
     *ctx = (struct tasks_ctx){0};
 }
+
+// * Functions *
 
 AU_EXTERN_FUNC_DECL(tasks_run) {
     uv_run(uv_default_loop(), UV_RUN_DEFAULT);
@@ -52,8 +53,9 @@ au_extern_module_t au_extern_module_load(struct au_extern_module_options *option
         // * file.c *
         au_extern_module_add_fn(data, "open", tasks_file_open, 2);
         au_extern_module_add_fn(data, "close", tasks_file_close, 1);
-        au_extern_module_add_fn(data, "read", tasks_file_read, 1);
-        au_extern_module_add_fn(data, "write", tasks_file_write, 1);
+        au_extern_module_add_fn(data, "read", tasks_file_read, 2);
+        au_extern_module_add_fn(data, "read_up_to", tasks_file_read_up_to, 3);
+        au_extern_module_add_fn(data, "write", tasks_file_write, 3);
         return data;
     } else {
         return 0;

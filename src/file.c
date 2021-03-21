@@ -7,6 +7,10 @@
 
 #define MAX_SMALL_PATH 256
 
+// * Task *
+
+// * File *
+
 struct tasks_file {
     struct au_struct header;
     uv_fs_t open_req;
@@ -21,7 +25,7 @@ static void file_close(struct tasks_file *file) {
     }
 }
 
-/* Events */
+// * Events *
 
 static void on_open(uv_fs_t *open_req) {
     struct tasks_file *file = (struct tasks_file *)open_req->data;
@@ -32,7 +36,7 @@ static void on_open(uv_fs_t *open_req) {
     }
 }
 
-/* Objects & functions */
+// * Objects & functions *
 
 struct _Thread_local au_struct_vdata file_vdata;
 static _Thread_local int file_vdata_inited = 0;
@@ -120,21 +124,118 @@ fail:
 }
 
 AU_EXTERN_FUNC_DECL(tasks_file_close) {
-    const au_value_t file_val = _args[0];
-    struct au_struct *file_struct = au_struct_coerce(file_val);
+    const au_value_t file_value = _args[0];
+    struct au_struct *file_struct = au_struct_coerce(file_value);
     if (file_struct == NULL || file_struct->vdata != &file_vdata) {
-        au_value_deref(file_val);
+        au_value_deref(file_value);
         return au_value_op_error();
     }
     file_close((struct tasks_file *)file_struct);
-    au_value_deref(file_val);
+    au_value_deref(file_value);
     return au_value_none();
 }
 
 AU_EXTERN_FUNC_DECL(tasks_file_read) {
-    abort();
+    au_value_t file_value = au_value_none();
+    au_value_t func_value = au_value_none();
+
+    // File argument
+    file_value = _args[0];
+    struct au_struct *file_struct = au_struct_coerce(file_value);
+    if (file_struct == NULL || file_struct->vdata != &file_vdata)
+        goto fail;
+    struct tasks_file *file = (struct tasks_file *)file_struct;
+
+    // Function argument
+    func_value = _args[1];
+    if(au_value_get_type(func_value) != AU_VALUE_FN)
+        goto fail;
+    struct au_fn_value *func = au_value_get_fn(func_value);
+
+    // TODO
+
+    au_value_deref(file_value);
+    au_value_deref(func_value);
+    return au_value_none();
+
+fail:
+    au_value_deref(file_value);
+    au_value_deref(func_value);
+    return au_value_op_error();
+}
+
+AU_EXTERN_FUNC_DECL(tasks_file_read_up_to) {
+    au_value_t file_value = au_value_none();
+    au_value_t n_value = au_value_none();
+    au_value_t func_value = au_value_none();
+
+    // File argument
+    file_value = _args[0];
+    struct au_struct *file_struct = au_struct_coerce(file_value);
+    if (file_struct == NULL || file_struct->vdata != &file_vdata)
+        goto fail;
+    struct tasks_file *file = (struct tasks_file *)file_struct;
+
+    // number of bytes argument
+    n_value = _args[1];
+    if(au_value_get_type(n_value) != AU_VALUE_INT)
+        goto fail;
+    const int32_t n_bytes = au_value_get_int(n_value);
+
+    // Function argument
+    func_value = _args[1];
+    if(au_value_get_type(func_value) != AU_VALUE_FN)
+        goto fail;
+    struct au_fn_value *func = au_value_get_fn(func_value);
+
+    // TODO
+
+    au_value_deref(file_value);
+    au_value_deref(n_value);
+    au_value_deref(func_value);
+    return au_value_none();
+
+fail:
+    au_value_deref(file_value);
+    au_value_deref(n_value);
+    au_value_deref(func_value);
+    return au_value_op_error();
 }
 
 AU_EXTERN_FUNC_DECL(tasks_file_write) {
-    abort();
+    au_value_t file_value = au_value_none();
+    au_value_t out_value = au_value_none();
+    au_value_t func_value = au_value_none();
+
+    // File argument
+    file_value = _args[0];
+    struct au_struct *file_struct = au_struct_coerce(file_value);
+    if (file_struct == NULL || file_struct->vdata != &file_vdata)
+        goto fail;
+    struct tasks_file *file = (struct tasks_file *)file_struct;
+
+    // Output argument
+    out_value = _args[1];
+    if(au_value_get_type(out_value) != AU_VALUE_STR)
+        goto fail;
+    const struct au_string *out = au_value_get_string(out_value);
+
+    // Function argument
+    func_value = _args[2];
+    if(au_value_get_type(func_value) != AU_VALUE_FN)
+        goto fail;
+    struct au_fn_value *func = au_value_get_fn(func_value);
+
+    // TODO
+
+    au_value_deref(file_value);
+    au_value_deref(out_value);
+    au_value_deref(func_value);
+    return au_value_none();
+
+fail:
+    au_value_deref(file_value);
+    au_value_deref(out_value);
+    au_value_deref(func_value);
+    return au_value_op_error();
 }
