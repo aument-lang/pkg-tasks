@@ -3,18 +3,16 @@ project('pkg-tasks', 'c')
 cc = meson.get_compiler('c')
 
 aument = find_program('aument')
-add_project_arguments(
-    run_command(aument, [
-        '--cflags'
-    ]).stdout(),
-    language: ['c']
-)
-add_global_link_arguments(
-    run_command(aument, [
-        '--libs'
-    ]).stdout(),
-    language: ['c']
-)
+
+arg = run_command(aument, [ '--cflags' ]).stdout()
+if arg != ''
+    add_project_arguments(arg, language: ['c'])
+endif
+
+arg = run_command(aument, [ '--libs' ]).stdout()
+if arg != ''
+    add_global_link_arguments(libs_arg, language: ['c'])
+endif
 
 uv_dep = cc.find_library('uv')
 

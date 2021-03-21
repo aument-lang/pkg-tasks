@@ -1,4 +1,4 @@
-import "../build/libtasks.dll" as tasks;
+import "../build/libtasks.lib" as tasks;
 
 def callback() {
     print "hello world\n";
