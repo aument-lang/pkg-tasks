@@ -47,41 +47,61 @@ static void tasks_internal_timer_cb(uv_timer_t *handle) {
 // * Implementation *
 
 AU_EXTERN_FUNC_DECL(tasks_set_interval) {
+    au_value_t func_value = au_value_none();
+    au_value_t ms_value = au_value_none();
+
     // Function argument
-    au_value_t func_value = _args[0];
+    func_value = _args[0];
     if(au_value_get_type(func_value) != AU_VALUE_FN)
-        return au_value_op_error();
+        goto fail;
     struct au_fn_value *func = au_value_get_fn(func_value);
 
     // Interval argument
-    au_value_t ms_value = _args[1];
+    ms_value = _args[1];
     if(au_value_get_type(ms_value) != AU_VALUE_INT)
-        return au_value_op_error();
-    int32_t ms = au_value_get_int(ms_value);
+        goto fail;
+    const int32_t ms = au_value_get_int(ms_value);
 
     // Timer
     struct task_timer *timer = task_timer_new(func);
     uv_timer_start(&timer->timer, tasks_internal_timer_cb, 0, (uint64_t)ms);
 
+    au_value_deref(func_value);
+    au_value_deref(ms_value);
     return au_value_none();
+
+fail:
+    au_value_deref(func_value);
+    au_value_deref(ms_value);
+    return au_value_op_error();
 }
 
 AU_EXTERN_FUNC_DECL(tasks_set_timeout) {
+    au_value_t func_value = au_value_none();
+    au_value_t ms_value = au_value_none();
+
     // Function argument
-    au_value_t func_value = _args[0];
+    func_value = _args[0];
     if(au_value_get_type(func_value) != AU_VALUE_FN)
-        return au_value_op_error();
+        goto fail;
     struct au_fn_value *func = au_value_get_fn(func_value);
 
     // Interval argument
-    au_value_t ms_value = _args[1];
+    ms_value = _args[1];
     if(au_value_get_type(ms_value) != AU_VALUE_INT)
-        return au_value_op_error();
-    int32_t ms = au_value_get_int(ms_value);
+        goto fail;
+    const int32_t ms = au_value_get_int(ms_value);
 
     // Timer
     struct task_timer *timer = task_timer_new(func);
     uv_timer_start(&timer->timer, tasks_internal_timer_cb, (uint64_t)ms, 0);
 
+    au_value_deref(func_value);
+    au_value_deref(ms_value);
     return au_value_none();
+
+fail:
+    au_value_deref(func_value);
+    au_value_deref(ms_value);
+    return au_value_op_error();
 }

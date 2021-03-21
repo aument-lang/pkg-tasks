@@ -1,0 +1,5 @@
+import "../build/libtasks.dll" as tasks;
+import "../build/libtasks.dll:file" as tfile;
+
+f = tfile::open("./tests/file.au", "r");
+tasks::run();

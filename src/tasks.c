@@ -5,8 +5,10 @@
 
 #include "tasks.h"
 #include "timer.h"
+#include "file.h"
 
 _Thread_local struct tasks_ctx tasks_ctx;
+static _Thread_local int tasks_ctx_init = 0;
 
 static void tasks_ctx_del(struct tasks_ctx *ctx) {
     struct task_header *cur = ctx->task_list;
@@ -25,11 +27,27 @@ AU_EXTERN_FUNC_DECL(tasks_run) {
     return au_value_none();
 }
 
-struct au_program_data *au_module_load() {
-    tasks_ctx = (struct tasks_ctx){0};
-    struct au_program_data *data = au_module_new();
-    au_module_add_fn(data, "set_interval", tasks_set_interval, 2);
-    au_module_add_fn(data, "set_timeout", tasks_set_timeout, 2);
-    au_module_add_fn(data, "run", tasks_run, 0);
-    return data;
+au_extern_module_t au_extern_module_load(struct au_extern_module_options *options) {
+    if(!tasks_ctx_init) {
+        tasks_ctx = (struct tasks_ctx){0};
+        tasks_ctx_init = 1;
+    }
+    if(options->subpath == 0) {
+        au_extern_module_t data = au_extern_module_new();
+        // * timer.c *
+        au_extern_module_add_fn(data, "set_interval", tasks_set_interval, 2);
+        au_extern_module_add_fn(data, "set_timeout", tasks_set_timeout, 2);
+        au_extern_module_add_fn(data, "run", tasks_run, 0);
+        return data;
+    } else if(strcmp(options->subpath, "file") == 0) {
+        au_extern_module_t data = au_extern_module_new();
+        // * file.c *
+        au_extern_module_add_fn(data, "open", tasks_file_open, 2);
+        au_extern_module_add_fn(data, "close", tasks_file_close, 1);
+        au_extern_module_add_fn(data, "read", tasks_file_read, 1);
+        au_extern_module_add_fn(data, "write", tasks_file_write, 1);
+        return data;
+    } else {
+        return 0;
+    }
 }

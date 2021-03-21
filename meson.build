@@ -23,6 +23,8 @@ src = [
     'src/tasks.h',
     'src/timer.c',
     'src/timer.h',
+    'src/file.c',
+    'src/file.h',
 ]
 shared_module('tasks', src,
     include_directories: include_directories('src'),
