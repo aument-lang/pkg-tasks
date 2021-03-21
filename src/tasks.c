@@ -10,6 +10,14 @@
 _Thread_local struct tasks_ctx tasks_ctx;
 static _Thread_local int tasks_ctx_init = 0;
 
+void tasks_ctx_append(struct task_header *header) {
+    header->prev = 0;
+    header->next = tasks_ctx.task_list;
+    if(tasks_ctx.task_list != 0)
+        tasks_ctx.task_list->prev = header;
+}
+
+
 static void tasks_ctx_del(struct tasks_ctx *ctx) {
     struct task_header *cur = ctx->task_list;
     while(cur != 0) {

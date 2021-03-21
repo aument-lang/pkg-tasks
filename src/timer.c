@@ -18,14 +18,10 @@ static void task_timer_del(struct task_timer *timer) {
 
 static struct task_timer *task_timer_new(struct au_fn_value *fn) {
     struct task_timer *timer = au_data_malloc(sizeof(struct task_timer));
-
     timer->header.prev = 0;
-    timer->header.next = tasks_ctx.task_list;
-    if(tasks_ctx.task_list != 0)
-        tasks_ctx.task_list->prev = (struct task_header *)timer;
-
+    timer->header.next = 0;
     timer->header.del = (task_del_fn_t)task_timer_del;
-
+    
     au_value_ref(au_value_fn(fn));
     timer->timer.data = fn;
 
@@ -34,6 +30,7 @@ static struct task_timer *task_timer_new(struct au_fn_value *fn) {
         return 0;
     }
 
+    tasks_ctx_append(&timer->header);
     return timer;
 }
 

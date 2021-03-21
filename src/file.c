@@ -9,19 +9,27 @@
 
 struct tasks_file {
     struct au_struct header;
-    uv_fs_t req;
+    uv_fs_t open_req;
+    int is_open_req_free;
 };
 
 static void file_close(struct tasks_file *file) {
-    // TODO
-    (void)file;
+    if(!file->is_open_req_free) {
+        file->is_open_req_free = 1;
+        uv_fs_req_cleanup(&file->open_req);
+        file->open_req = (uv_fs_t){0};
+    }
 }
 
 /* Events */
 
-static void on_open(uv_fs_t *req) {
-    struct tasks_file *file = (struct tasks_file *)req->data;
-    fprintf(stderr, "opened file %s\n", file->req.path);
+static void on_open(uv_fs_t *open_req) {
+    struct tasks_file *file = (struct tasks_file *)open_req->data;
+    if(!file->is_open_req_free) {
+        file->is_open_req_free = 1;
+        uv_fs_req_cleanup(open_req);
+        *open_req = (uv_fs_t){0};
+    }
 }
 
 /* Objects & functions */
@@ -44,6 +52,18 @@ AU_EXTERN_FUNC_DECL(tasks_file_open) {
     au_value_t path_val = au_value_none();
     au_value_t mode_val = au_value_none();
 
+    struct tasks_file *file = 
+        au_obj_malloc(sizeof(struct tasks_file), (au_obj_del_fn_t)file_close);
+    file_vdata_init();
+    file->header = (struct au_struct){
+        .rc = 1,
+        .vdata = &file_vdata,
+    };
+
+    file->open_req = (uv_fs_t){0};
+    file->open_req.data = file;
+    file->is_open_req_free = 0;
+
     path_val = _args[0];
     if (au_value_get_type(path_val) != AU_VALUE_STR)
         goto fail;
@@ -65,9 +85,7 @@ AU_EXTERN_FUNC_DECL(tasks_file_open) {
     else
         goto fail;
 
-    struct tasks_file *file = 0;
     int fd = -1;
-    uv_fs_t req;
 
     // Set up path parameter & open the file
     if (path_str->len < MAX_SMALL_PATH) {
@@ -76,28 +94,17 @@ AU_EXTERN_FUNC_DECL(tasks_file_open) {
         char path_param[MAX_SMALL_PATH] = {0};
         memcpy(path_param, path_str->data, path_str->len);
         path_param[path_str->len] = 0;
-        fd = uv_fs_open(uv_default_loop(), &req, path_param, flags, mode, on_open);
+        fd = uv_fs_open(uv_default_loop(), &file->open_req, path_param, flags, mode, on_open);
     } else {
         char *path_param = au_data_malloc(path_str->len + 1);
         memcpy(path_param, path_str->data, path_str->len);
         path_param[path_str->len] = 0;
-        fd = uv_fs_open(uv_default_loop(), &req, path_param, flags, mode, on_open);
+        fd = uv_fs_open(uv_default_loop(), &file->open_req, path_param, flags, mode, on_open);
         au_data_free(path_param);
     }
 
     if(fd < 0)
         goto fail;
-
-    file =
-        au_obj_malloc(sizeof(struct tasks_file), (au_obj_del_fn_t)file_close);
-    file_vdata_init();
-    file->header = (struct au_struct){
-        .rc = 1,
-        .vdata = &file_vdata,
-    };
-
-    req.data = file;
-    memcpy(&file->req, &req, sizeof(uv_fs_t));
 
     fd = -1;
 
@@ -108,10 +115,7 @@ AU_EXTERN_FUNC_DECL(tasks_file_open) {
 fail:
     au_value_deref(path_val);
     au_value_deref(mode_val);
-    if(fd >= 0)
-        uv_fs_req_cleanup(&req);
-    if(file != 0)
-        au_obj_free(file);
+    au_obj_free(file);
     return au_value_none();
 }
 
@@ -127,6 +131,10 @@ AU_EXTERN_FUNC_DECL(tasks_file_close) {
     return au_value_none();
 }
 
-AU_EXTERN_FUNC_DECL(tasks_file_read) {}
+AU_EXTERN_FUNC_DECL(tasks_file_read) {
+    abort();
+}
 
-AU_EXTERN_FUNC_DECL(tasks_file_write) {}
+AU_EXTERN_FUNC_DECL(tasks_file_write) {
+    abort();
+}

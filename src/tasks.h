@@ -15,3 +15,5 @@ struct task_header {
 };
 
 extern _Thread_local struct tasks_ctx tasks_ctx;
+
+void tasks_ctx_append(struct task_header *header);

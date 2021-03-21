@@ -1,5 +1,5 @@
 import "../build/libtasks.lib" as tasks;
-import "../build/libtasks.lib:file" as tfile;
+import "../build/libtasks.lib:file" as async_file;
 
-f = tfile::open("./tests/file.au", "r");
+f = async_file::open("./tests/file.au", "r");
 tasks::run();
