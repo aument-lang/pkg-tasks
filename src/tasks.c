@@ -40,6 +40,7 @@ au_extern_module_t au_extern_module_load(struct au_extern_module_options *option
     if(!tasks_ctx_init) {
         tasks_ctx = (struct tasks_ctx){0};
         tasks_ctx_init = 1;
+        uv_replace_allocator(au_data_malloc, au_data_realloc, au_data_calloc, au_data_free);
     }
     if(options->subpath == 0) {
         au_extern_module_t data = au_extern_module_new();

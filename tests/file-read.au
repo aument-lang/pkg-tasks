@@ -1,0 +1,8 @@
+import "../build/libtasks.lib" as tasks;
+import "../build/libtasks.lib:file" as async_file;
+
+def cb() {}
+
+f = async_file::open("/tmp/a", "r");
+async_file::read_up_to(f, 3, .cb);
+tasks::run();
