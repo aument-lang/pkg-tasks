@@ -11,7 +11,7 @@ endif
 
 arg = run_command(aument, [ '--libs' ]).stdout()
 if arg != ''
-    add_global_link_arguments(libs_arg, language: ['c'])
+    add_global_link_arguments(arg, language: ['c'])
 endif
 
 uv_dep = cc.find_library('uv')
